@@ -9,6 +9,8 @@
   <body>
     <canvas id="gameCanvas" width="320" height="480"></canvas>
     <script>
+      const key = 'flappyHighScore_' + window.location.hostname;
+      let highScore = Number(localStorage.getItem(key) || 0);
       const canvas = document.getElementById('gameCanvas');
       const ctx = canvas.getContext('2d');
       let birdY = canvas.height / 2, velocity = 0, gravity = 0.8, jump = -12;
@@ -50,6 +52,7 @@
         ctx.fillStyle = 'black';
         ctx.font = '24px Arial';
         ctx.fillText('Score: ' + score, 10, 40);
+        ctx.fillText("High: " + highScore, canvas.width - 100, 40),
 
         // Bird physics
         velocity += gravity;
@@ -59,6 +62,12 @@
         if (!gameOver) requestAnimationFrame(draw);
         else ctx.fillText('Game Over', 90, 240);
         }
+        if (score > highScore) {
+            highScore = score;
+        } else{
+            localStorage.setItem('flappyHighScore', highScore)
+        }           
+
         
         let mouseIsDown = false;
 
@@ -83,6 +92,10 @@
 
         canvas.addEventListener('mouseup', () => {
           mouseIsDown = false;  // Reset flag when mouse button is released
+        });
+
+        canvas.addEventListener('click', () => {
+            if (gameOver) birdY = canvas.height/2, velocity = 0, pipes = [{x:400, y: 200*Math.random()+50}], score = 0, gameOver = false, draw();
         });
 
 
