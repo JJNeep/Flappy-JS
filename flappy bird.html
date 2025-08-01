@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Flappy Bird JS</title>
+    <style>
+      canvas { background: #70c5ce; display: block; margin: 0 auto; }
+    </style>
+  </head>
+  <body>
+    <canvas id="gameCanvas" width="320" height="480"></canvas>
+    <script>
+      const canvas = document.getElementById('gameCanvas');
+      const ctx = canvas.getContext('2d');
+      let birdY = canvas.height / 2, velocity = 0, gravity = 0.8, jump = -12;
+      let pipes = [{x: 400, y: Math.random() * 200 + 50}];
+      let score = 0, gameOver = false;
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Bird
+        ctx.fillStyle = 'yellow';
+        ctx.beginPath();
+        ctx.arc(60, birdY, 15, 0, 2 * Math.PI);
+        ctx.fill();
+
+        // Pipes
+        ctx.fillStyle = 'green';
+        pipes.forEach(pipe => {
+          ctx.fillRect(pipe.x, 0, 40, pipe.y); // Top pipe
+          ctx.fillRect(pipe.x, pipe.y + 150, 40, canvas.height); // Bottom pipe
+        });
+
+        // Scoring and moving pipes
+        pipes.forEach(pipe => {
+          pipe.x -= 2;
+          if (pipe.x === 60) score++;
+          if (
+            60 + 15 > pipe.x && 60 - 15 < pipe.x + 40 &&
+            (birdY - 15 < pipe.y || birdY + 15 > pipe.y + 160)
+          ) gameOver = true;
+        });
+
+        // Add new pipes, remove off-screen pipes
+        if (pipes[pipes.length - 1].x < 200)
+          pipes.push({x: 400, y: Math.random() * 200 + 50});
+        if (pipes[0].x < -40) pipes.shift();
+
+        // Score
+        ctx.fillStyle = 'black';
+        ctx.font = '24px Arial';
+        ctx.fillText('Score: ' + score, 10, 40);
+
+        // Bird physics
+        velocity += gravity;
+        birdY += velocity;
+        if (birdY + 15 >= canvas.height || birdY - 15 <= 0) gameOver = true;
+
+        if (!gameOver) requestAnimationFrame(draw);
+        else ctx.fillText('Game Over', 90, 240);
+        }
+        
+        let mouseIsDown = false;
+
+        document.addEventListener('keydown', function(e) {
+          if (e.code === 'Space' && !gameOver) {
+            velocity = jump; // Make the bird jump
+          }
+        });
+
+        document.addEventListener('keydown', function(e) {
+          if (e.code === 'ArrowUp' && !gameOver) {
+            velocity = jump; // Make the bird jump
+          }
+        });
+
+        canvas.addEventListener('mousedown', () => {
+          if (!gameOver && !mouseIsDown) {
+            velocity = jump;  // Trigger the jump
+            mouseIsDown = true;  // Mark mouse as down so no repeat jumps while holding
+          }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+          mouseIsDown = false;  // Reset flag when mouse button is released
+        });
+
+
+      draw();
+    </script>
+  </body>
+</html>
